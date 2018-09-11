@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Ordenando Filmes</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+
+<body>
+<h1>Bilheteria por Filme</h1>
+<div id="chart1"></div>
+<script type="text/javascript">
+    function render(data, comparator, id, att, color, mult) {
+        d3.select("#chart"+id).selectAll("div.h-bar")
+        .data(data)
+        .enter().append("div")
+        .attr("class", "h-bar").style("background-color", color) 
+        .append("span")
+        
+        d3.select("#chart"+id).selectAll("div.h-bar")
+        .data(data)
+        .attr("class", "h-bar")
+        .style("width", function (d) {
+            return (d[att] * mult) + "px";
+        })
+        .select("span")
+        .text(function (d) {
+                return d.Film;
+            })
+        if(comparator){
+            d3.select("#chart"+id)
+            .selectAll("div.h-bar")
+            .sort(comparator)
+        }
+    }
+
+    let comparePorVendas = function (a, b) { 
+        return b.Worldwide_Gross_M - a.Worldwide_Gross_M;
+    }
+
+    let comparePorBudget = function (a,b) {
+        return b.Budget_M - a.Budget_M;
+    }
+    
+    d3.json("data/movies.json").then(function(json){ 
+        render(json,comparePorVendas,1,"Worldwide_Gross_M","blue",0.7);
+    })
+</script>
+<h1>Orçamento por Filme</h1>
+<div id="chart2"></div>
+<script>
+    d3.json("data/movies.json").then(function(json){ 
+        render(json,comparePorBudget,2,"Budget_M","green",2);
+    })
+</script>
+<h1>Bilheteria por Gênero</h1>
+<div id="chart3"></div>
+<script>
+    function render_genres(data, comparator, id, att, color, mult) {
+        genres = {}
+        for (i in data) {
+            if (!(data[i]["Genre"] in genres)){
+                genres[data[i]["Genre"]] = data[i]["Worldwide_Gross_M"]
+            }
+            else{
+                genres[data[i]["Genre"]] = genres[data[i]["Genre"]] + data[i]["Worldwide_Gross_M"]
+            }
+        }
+        genres_data = []
+        keys = Object.keys(genres)
+        for (i in keys){
+            genres_data.push({"Genre": keys[i], "Worldwide_Gross_M": genres[keys[i]]})
+        }
+
+        d3.select("#chart"+id).selectAll("div.h-bar")
+        .data(genres_data)
+        .enter().append("div")
+        .attr("class", "h-bar").style("background-color", color) 
+        .append("span")
+        
+        d3.select("#chart"+id).selectAll("div.h-bar")
+        .data(genres_data)
+        .attr("class", "h-bar")
+        .style("width", function (d) {
+            return (d[att] * mult) + "px";
+        })
+        .select("span")
+        .text(function (d) {
+                return d.Genre;
+            })
+        if(comparator){
+            d3.select("#chart"+id)
+            .selectAll("div.h-bar")
+            .sort(comparator)
+        }
+    }
+
+    d3.json("data/movies.json").then(function(json){ 
+        render_genres(json,comparePorVendas,3,"Worldwide_Gross_M","purple",0.08);
+    })
+</script>
+</body>
+</html>
