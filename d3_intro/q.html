@@ -11,7 +11,7 @@
 <h1>Bilheteria por Filme</h1>
 <div id="chart1"></div>
 <script type="text/javascript">
-    function render(data, comparator, id, att, color, mult) {
+    function render(data, comparator, id, att, color, mult, label) {
         d3.select("#chart"+id).selectAll("div.h-bar")
         .data(data)
         .enter().append("div")
@@ -26,7 +26,7 @@
         })
         .select("span")
         .text(function (d) {
-                return d.Film;
+                return d[label];
             })
         if(comparator){
             d3.select("#chart"+id)
@@ -42,29 +42,43 @@
     let comparePorBudget = function (a,b) {
         return b.Budget_M - a.Budget_M;
     }
+
+    let comparePorLucro = function (a,b) {
+        return b.Profit - a.Profit;
+    }
     
     d3.json("data/movies.json").then(function(json){ 
-        render(json,comparePorVendas,1,"Worldwide_Gross_M","blue",0.7);
+        render(json,comparePorVendas,1,"Worldwide_Gross_M","blue",0.7,"Film");
     })
 </script>
 <h1>Orçamento por Filme</h1>
 <div id="chart2"></div>
 <script>
     d3.json("data/movies.json").then(function(json){ 
-        render(json,comparePorBudget,2,"Budget_M","green",2);
+        render(json,comparePorBudget,2,"Budget_M","green",2,"Film");
+    })
+</script>
+<h1>Lucro por Filme</h1>
+<div id="chart3"></div>
+<script>
+    d3.json("data/movies.json").then(function(json){
+        for (i in json) {
+            json[i]["Profit"] = json[i]["Worldwide_Gross_M"] + json[i]["Budget_M"];
+        }
+        render(json,comparePorLucro,3,"Profit","red",0.4,"Film");
     })
 </script>
 <h1>Bilheteria por Gênero</h1>
-<div id="chart3"></div>
+<div id="chart4"></div>
 <script>
-    function render_genres(data, comparator, id, att, color, mult) {
+    d3.json("data/movies.json").then(function(json){
         genres = {}
-        for (i in data) {
-            if (!(data[i]["Genre"] in genres)){
-                genres[data[i]["Genre"]] = data[i]["Worldwide_Gross_M"]
+        for (i in json) {
+            if (!(json[i]["Genre"] in genres)){
+                genres[json[i]["Genre"]] = json[i]["Worldwide_Gross_M"]
             }
             else{
-                genres[data[i]["Genre"]] = genres[data[i]["Genre"]] + data[i]["Worldwide_Gross_M"]
+                genres[json[i]["Genre"]] = genres[json[i]["Genre"]] + json[i]["Worldwide_Gross_M"]
             }
         }
         genres_data = []
@@ -72,32 +86,8 @@
         for (i in keys){
             genres_data.push({"Genre": keys[i], "Worldwide_Gross_M": genres[keys[i]]})
         }
-
-        d3.select("#chart"+id).selectAll("div.h-bar")
-        .data(genres_data)
-        .enter().append("div")
-        .attr("class", "h-bar").style("background-color", color) 
-        .append("span")
-        
-        d3.select("#chart"+id).selectAll("div.h-bar")
-        .data(genres_data)
-        .attr("class", "h-bar")
-        .style("width", function (d) {
-            return (d[att] * mult) + "px";
-        })
-        .select("span")
-        .text(function (d) {
-                return d.Genre;
-            })
-        if(comparator){
-            d3.select("#chart"+id)
-            .selectAll("div.h-bar")
-            .sort(comparator)
-        }
-    }
-
-    d3.json("data/movies.json").then(function(json){ 
-        render_genres(json,comparePorVendas,3,"Worldwide_Gross_M","purple",0.08);
+         
+        render(genres_data,comparePorVendas,4,"Worldwide_Gross_M","purple",0.08,"Genre");
     })
 </script>
 </body>
