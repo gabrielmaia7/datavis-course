@@ -11,71 +11,74 @@
 
 </head>
 <body>
-     <div><h1> Bilheteria por ano e por genero</h1>
-        <div id="chartano"></div>
-        <div id="chartgen"></div>
-    </div>
+    <h1> Bilheteria por ano</h1>
+    <div id="chartano"></div>
+    <h1> Bilheteria por genero</h1>
+    <div id="chartgen"></div>
     <script type="text/javascript">
-        let chartPorAno = dc.barChart('#chartano');
-        let chartPorGenero = dc.barChart('#chartgen');
+        var chartPorAno = dc.barChart('#chartano');
+        var chartPorGenero = dc.barChart('#chartgen');
 
         d3.json("data/movies.json").then(function(data){
             // formatando nossos dados
             data.forEach(function(d){
-                d.Budget_M = +d.Budget_M;
-                d.Worldwide_Gross_M = +d.Worldwide_Gross_M;
+                d["Budget_M"] = +d["Budget_M"];
+                d["Worldwide_Gross_M"] = +d["Worldwide_Gross_M"];
             });
 
             //criando um crossfilter
             let facts = crossfilter(data);
 
             let yearDim = facts.dimension(function(d){
-                return d.Year;
+                return +d["Year"];
             });
 
             let genDim = facts.dimension(function(d){
-                return d.Genre;
+                return d["Genre"];
             });
 
             let grossByYearGroup = yearDim.group().reduceSum(function(d){
-                return d.Worldwide_Gross_M;
+                return d["Worldwide_Gross_M"];
             });
 
             let grossByGenreGroup = genDim.group().reduceSum(function(d){
-                return d.Worldwide_Gross_M;
+                return d["Worldwide_Gross_M"];
             });
 
-            let xScaleYear = d3.scaleLinear()
-                           .domain([yearDim.bottom(1)[0].Year, yearDim.top(1)[0].Year]);
+            chartPorAno.width(768)
+                        .height(380)
+                        .x(d3.scaleOrdinal([yearDim.bottom(1)[0].Year, yearDim.top(1)[0].Year]))
+                        .xUnits(dc.units.ordinal)
+                        .renderHorizontalGridLines(true)
+                        .xAxisLabel('Ano')
+                        .yAxisLabel('Bilheteria')
+                        .dimension(yearDim)
+                        .barPadding(0.1)
+                        .outerPadding(0.05)
+                        .group(grossByYearGroup)
+                        .mouseZoomable(true)
+                        .ordinalColors(['darkorange']);
+            chartPorAno.margins().left = 60;
 
-            let xScaleGenre = d3.scaleLinear()
-                           .domain([genDim.bottom(1)[0].Genre, genDim.top(1)[0].Genre]);
+            chartPorGenero.width(768)
+                        .height(380)
+                        .x(d3.scaleOrdinal([genDim.bottom(1)[0].Genre, genDim.top(1)[0].Genre]))
+                        .xUnits(dc.units.ordinal)
+                        .renderHorizontalGridLines(true)
+                        .xAxisLabel('Genero')
+                        .yAxisLabel('Bilheteria')
+                        .dimension(genDim)
+                        .barPadding(0.1)
+                        .outerPadding(0.05)
+                        .group(grossByGenreGroup)
+                        .mouseZoomable(true)
+                        .ordinalColors(['steelblue']);
+            chartPorGenero.margins().left = 60;
 
-            chartPorAno.width(800)
-                     .height(400)
-                     .margins({top: 50, right: 50, bottom: 25, left: 40})
-                     .dimension(yearDim)
-                     .group(grossByYearGroup, 'Ano')
-                     .centerBar(false)
-                    .gap(1)
-                    .x(d3.scaleLinear().domain([yearDim.bottom(1)[0].Year, yearDim.top(1)[0].Year]))
-                    .round(d3.timeYear.round)
-                    .alwaysUseRounding(true)
-                    .xUnits(d3.timeYears);
-            /**         .elasticY(true)
-                     .centerBar(false)
-                     .gap(1)
-                     .round(dc.round.floor)
-                    .alwaysUseRounding(true)
-                    .x(xScaleYear)
-                    .renderHorizontalGridLines(true)
-                    .xAxis().tickFormat(d3.format("d"))
-                     ;
-            chartPorAno.xAxis().ticks(5);
-            **/
             dc.renderAll();
-
         });
-    </script>           
+
+        
+    </script>         
 </body>
 </html>
