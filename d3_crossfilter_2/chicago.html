@@ -13,7 +13,7 @@
    crossorigin=""></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
-    <title> Earthquake Data</title>
+    <title> Chicago Crimes</title>
 
     <!-- Custom styles for this template -->
 	<link rel="stylesheet" href="css/dc.min.css">
@@ -28,50 +28,38 @@
     	<div id='mapid' class='col-6'>
     	</div>
     	<div class="col-6">
-		    <div id='magnitude-chart'>
-		      <h4> Number of Events by Magnitude </h4>
+		    <div id='total-chart'>
+		      <h4> Crime Total </h4>
 		    </div>
-		    <div id='depth-chart' class="top-buffer">
-			  <h4> Events by Depth (km) </h4>
+		    <div id='time-chart' class="top-buffer">
+			  <h4> Crimes per Day </h4>
 		    </div>
 		</div>   
     </div>
-    <div class='row'>
-      <div id='time-chart' class="single-col">
-         <h4> Events per hour </h4>
-      </div>
-
-	</div>
-	<table class="table table-hover" id="dc-table-graph">
-        <thead>
-            <tr class="header">
-                <th>DTG</th>
-                <th>Magnitude</th>
-                <th>Depth</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-            </tr>
-        </thead>
-    </table>
   </main>
   <script type="text/javascript">
+
+
 	// Create the dc.js chart objects & link to div
 	var chartTable = dc.dataTable('#dc-table-graph');
 
 	// load data from a csv file
-	d3.csv("data/earthquakes.csv").then(function (data) {
+	d3.csv("data/chicago_crimes_sep_2018.csv").then(function (data) {
 
 	  // format our data
 	  data.forEach(function(d){
-	  	d.dtg = (d3.utcParse("%Y-%m-%dT%H:%M:%S"))(d.origintime.substr(0,19));
-	  	d.magnitude = d3.format(".1f")(d.magnitude);
-	  	d.depth = d3.format("d")(d.depth);
+	  	d.Latitude = +d.Latitude;
+	  	d.Longitude = +d.Longitude;
+	  	d.Date = (d3.utcParse("%D %r"))(d.Date);
 	  });
+
+	  let colorScale = d3.scaleOrdinal() 
+        .domain(["HOMICIDE", "ROBBERY", "BURGLARY"]) 
+        .range(["#ca0020", "#0571b0", "#fdae61"]);
 
 	  // Run the data through crossfilter and load our 'facts'
 	  var facts = crossfilter(data);
 
-	  console.log(data);
 	   let dateDimension = facts.dimension(function(d){
 	            return d.dtg;
 	        });
@@ -113,12 +101,11 @@
 
 	  // Setup the charts
 	  var chartMagnitude = dc.barChart('#magnitude-chart');
-	  var chartDepth = dc.barChart("#depth-chart");
 	  var chartTime = dc.lineChart("#time-chart");
 
-	  let map = L.map('mapid').setView([-41.05,172.93], 5); 
-	  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { 
-		  attribution: '&copy; <a href="http://www.openstreetmap.org/">OpenStreetMap</a> contributors', maxZoom: 17 
+	  let map = L.map('mapid').setView([41.87,-87.66], 11); 
+	  L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', { 
+		  attribution: 'Map tiles by Carto, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', maxZoom: 17 
 	  }).addTo(map);
 
 	  data.forEach(function(d){
