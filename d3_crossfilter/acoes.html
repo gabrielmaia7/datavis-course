@@ -52,9 +52,9 @@
                      .dimension(dateDim)
                      .x(xScale)
                      .xUnits(d3.timeDays)
+                     .elasticY(true)
                      .renderHorizontalGridLines(true)
-                     .legend(dc.legend().x(700).y(5).itemHeight(13).gap(5))
-                     .brushOn(false)    
+                     .mouseZoomable(true)   
                      .compose([
                         dc.lineChart(compositeChart)
                                   .group(teslaByDayGroup, 'Tesla')

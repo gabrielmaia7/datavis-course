@@ -39,9 +39,10 @@
 
 ---
 
-## Aula do dia 26/09/2018
+## Aulas dos dias 26/09/2018, 01/10/2018 e 03/10/2018
 
 [earthquakes.html](d3_crossfilter_2/earthquakes.html)<br>
+[chicago.html](d3_crossfilter_2/chicago.html)<br>
 
 ---
 
