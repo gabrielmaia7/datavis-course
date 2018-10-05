@@ -1,4 +1,7 @@
-## Aula do dia 03/09/2018
+# Datavis course repo
+This repo contains the lab works done as part of the data visualization course, lectures at the [Federal University of Ceará](www.ufc.br), given by professor [Emanuele Santos](emanueles.github.io).
+
+## 03/09/2018
 
 [index01.html](basic/index01.html)<br>
 [index02.html](basic/index02.html)<br>
@@ -13,37 +16,33 @@
 
 ---
 
-## Aula do dia 05/09/2018
+## 05/09/2018
 
 [movies_d3.html](d3_intro/movies_d3.html)<br>
 
 
 ---
 
-## Aula do dia 12/09/2018
+## 12/09/2018
 
 [movies_scatter.html](d3_scale/movies_scatter.html)<br>
 
 ---
 
-## Aula do dia 17/09/2018
+## 17/09/2018
 
 [01_scatterplot.html](d3_update/01_scatterplot.html)<br>
 
 ---
 
-## Aula do dia 24/09/2018
+## 24/09/2018
 
 [acoes.html](d3_crossfilter/acoes.html)<br>
 [movies_d3_dc.html](d3_crossfilter/movies_d3_dc.html)<br>
 
 ---
 
-## Aulas dos dias 26/09/2018, 01/10/2018 e 03/10/2018
+## 26/09/2018, 01/10/2018 and 03/10/2018
 
 [earthquakes.html](d3_crossfilter_2/earthquakes.html)<br>
 [chicago.html](d3_crossfilter_2/chicago.html)<br>
-
----
-
-Para saber mais sobre a sintaxe markdown, veja [este guia](https://guides.github.com/features/mastering-markdown/).
