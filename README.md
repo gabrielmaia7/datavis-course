@@ -46,3 +46,17 @@ This repo contains the lab works done as part of the data visualization course, 
 
 [earthquakes.html](d3_crossfilter_2/earthquakes.html)<br>
 [chicago.html](d3_crossfilter_2/chicago.html)<br>
+
+---
+
+## 10/10/2018
+
+[songs.html](d3_networks_trees/songs.html)<br>
+[lesmiserables.html](d3_networks_trees/lesmiserables.html)<br>
+
+---
+
+## 22/10/2018
+
+[usa.html](color-d3/usa.html)<br>
+[crimes.html](color-d3/crimes.html)<br>
