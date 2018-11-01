@@ -60,3 +60,10 @@ This repo contains the lab works done as part of the data visualization course, 
 
 [usa.html](color-d3/usa.html)<br>
 [crimes.html](color-d3/crimes.html)<br>
+
+---
+
+## 31/10/2018
+
+[earthquakes.html](d3_interactive/earthquakes.html)<br>
+[usa.html](d3_interactive/usa.html)<br>
