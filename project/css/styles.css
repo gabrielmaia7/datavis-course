@@ -32,9 +32,15 @@ h2 span {
     list-style-type: none;
     margin-left: 0;
 }
+
 .dc-cbox-group label {
-display: inline-block;
+    display: inline-block;
 }
+
 .dc-cbox-group input[type=checkbox], .dc-cbox-group input[type=radio] {
-margin: 0 5px 5px 5px;
+    margin: 0 5px 5px 5px;
+}
+
+li:not(.dc-cbox-item) {
+    visibility: hidden;
 }

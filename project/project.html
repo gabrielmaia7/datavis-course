@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	   	<!-- Make sure you put this AFTER Leaflet's CSS --> 
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title> Project Data</title>
+
+    <!-- Custom styles for this template -->
+	<link rel="stylesheet" href="css/dc.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="js/crossfilter.min.js"></script>
+    <script src="js/dc.min.js"></script>
+</head>
+<body>
+  <main role="main" class="container">
+  	<div class='row'>
+    	<div id='chart1' class='col-6'>
+    	</div>
+    	<div id='chart2' class='col-6'>
+    	</div>
+    </div>
+    <div class='row'>
+   		<div id='chart3' class='col-6'>
+    	</div>
+    	<div id='chart4' class='col-6'>
+    	</div>
+    </div>
+    <div class='row'>
+   		<div id="cbox1" class='col-6'>
+		    <div>
+		      <a class='reset'
+		         href='javascript:cbox1.filterAll();dc.redrawAll();'
+		         style='visibility: hidden;'>reset</a>
+		    </div>
+   		</div>
+    	<div id="cbox2" class='col-6'>
+		    <div>
+		      <a class='reset'
+		         href='javascript:cbox2.filterAll();dc.redrawAll();'
+		         style='visibility: hidden;'>reset</a>
+		    </div>
+    	</div>
+    </div>
+    <div id='chart5'>
+   	</div>
+   	<div id='chart7'>
+   	</div>
+   	<div id='chart6'>
+   	</div>
+	<table class="table table-hover" id="table">
+        <thead>
+            <tr class="header">
+                <th>Q</th>
+                <!-- <th>TIPO</th> -->
+                <th>CT</th>
+                <th>C</th>
+                <th>D</th>
+                <th>DT</th>
+                <th>NSA</th>
+            </tr>
+        </thead>
+    </table>
+  </main>
+  <script type="text/javascript">
+	var qTable = dc.dataTable('#table');
+	var cbox1 = dc.cboxMenu('#cbox1');
+	var cbox2 = dc.cboxMenu('#cbox2');
+
+	// load data from a csv file
+	d3.csv("data/questao.csv").then(function (data) {
+
+		var anos = new Set();
+		var total = 0;
+
+		  // format our data
+		data.forEach(function(d){
+			d.ques = `Questão ${d.q}`;
+			d.ct = +d.ct;
+			d.c = +d.c;
+			d.d = +d.d;
+			d.dt = +d.dt;
+			d.nsa = +d.nsa;
+			anos.add(+d.ano);
+		});
+
+		// Run the data through crossfilter and load our 'facts'
+		var facts = crossfilter(data);
+
+
+		let qDimension = facts.dimension(function(d){
+				return +d.q;
+			});
+		let anoDimension = facts.dimension(function(d){
+				return d.ano;
+			});
+		let tipoDimension = facts.dimension(function(d){
+				return d.tipo;
+			}); 
+		let qAnoDimension = facts.dimension(function(d){
+				return [+d.q,+d.ano];
+			});
+	    let ctDimension = facts.dimension(function(d){
+	            return d.ct;
+	        });
+	    let cDimension = facts.dimension(function(d){
+	            return d.c;
+	        });
+	    let dDimension = facts.dimension(function(d){
+	            return d.d;
+	        });
+	    let dtDimension = facts.dimension(function(d){
+	            return d.dt;
+	        });
+	    let nsaDimension = facts.dimension(function(d){
+	            return d.nsa;
+	        });
+
+	   qTable.width(960)
+        .height(800)
+        .dimension(qDimension)
+        .group(function (d) { return `${d.ano}, ${d.tipo}`;})
+        .size(10)
+        .columns(['ques','ct','c','d','dt','nsa'])
+        .sortBy(function(d){return +d.q;})
+        .size(12*anos.size)	
+        .order(d3.ascending);
+
+		cbox1
+		.dimension(anoDimension)
+		.group(anoDimension.group())
+		.multiple(true)
+		.controlsUseVisibility(true);
+		cbox2
+		.dimension(tipoDimension)
+		.group(tipoDimension.group())
+		.multiple(true)
+		.controlsUseVisibility(true);
+
+
+	  let ctGroup = ctDimension.group();
+	  let cGroup = cDimension.group();
+	  let dGroup = dDimension.group();
+	  let dtGroup = dtDimension.group();
+	  let nsaGroup = nsaDimension.group();
+
+	  let ctByQ = qDimension.group().reduceSum(function(d){
+                return (d.ct+d.c);
+            });
+
+	  let dtByQ = qDimension.group().reduceSum(function(d){
+                return (d.dt+d.d);
+            });
+
+	  let ctByQAno = qAnoDimension.group().reduceSum(function(d){
+	  			return (d.ct+d.c);
+	  		});
+
+	  let dtByQAno = qAnoDimension.group().reduceSum(function(d){
+	  			return (d.dt+d.d);
+	  		});
+	  
+	  // Setup the charts
+	  var chart1 = dc.barChart('#chart1');
+
+	   chart1.width(480)
+                        .height(200)
+                        .x(d3.scaleBand([qDimension.bottom(1)[0].q, qDimension.top(1)[0].q]))
+                        .xUnits(dc.units.ordinal)
+                        .renderHorizontalGridLines(true)
+                        .dimension(qDimension)
+                        .gap(56)
+                        .xAxisLabel('Question')
+                        .yAxisLabel('Acc % C + CT')
+                        .elasticY(true)
+                        .group(ctByQ)
+                        .barPadding(0.1)
+                        .outerPadding(1)
+                        .ordinalColors(['steelblue']);
+
+        var chart2 = dc.barChart('#chart2');
+
+	   chart2.width(480)
+                        .height(200)
+                        .x(d3.scaleBand([qDimension.bottom(1)[0].q, qDimension.top(1)[0].q]))
+                        .xUnits(dc.units.ordinal)
+                        .renderHorizontalGridLines(true)
+                        .dimension(qDimension)
+                        .gap(56)
+                        .xAxisLabel('Question')
+                        .yAxisLabel('Acc % D + DT')
+                        .elasticY(true)
+                        .group(dtByQ)
+                        .barPadding(0.1)
+                        .outerPadding(1)
+                        .ordinalColors(['darkorange']);
+
+
+        var chart3 = dc.seriesChart('#chart3');
+
+        chart3.width(480)
+                     .height(150)
+                     .dimension(qAnoDimension)
+                     .chart(function(c) { 
+					      return dc.lineChart(c).curve(d3.curveLinear).evadeDomainFilter(true); 
+					   })
+                     .x(d3.scaleOrdinal().domain(d3.extent(data, function(d) { return +d.ano; })))
+                     .xAxisLabel('Year')
+                     .yAxisLabel('% CT + C')
+                     .group(ctByQAno)
+                     .elasticY(true)
+                     .brushOn(false)   
+                     .seriesAccessor(function(d) { return d.key[0]; })
+				     .keyAccessor(function(d) { return d.key[1]; })
+				     .valueAccessor(function(d) { return d.value; });
+
+		var chart4 = dc.seriesChart('#chart4');
+
+        chart4.width(480)
+                     .height(150)
+                     .dimension(qAnoDimension)
+                     .chart(function(c) { 
+					      return dc.lineChart(c).curve(d3.curveLinear).evadeDomainFilter(true); 
+					   })
+                     .x(d3.scaleOrdinal().domain(d3.extent(data, function(d) { return +d.ano; })))
+                     .xAxisLabel('Year')
+                     .yAxisLabel('% DT + D')
+                     .group(dtByQAno)
+                     .elasticY(true)
+                     .brushOn(false)    
+                     .seriesAccessor(function(d) { return d.key[0]; })
+				     .keyAccessor(function(d) { return d.key[1]; })
+				     .valueAccessor(function(d) { return d.value; });
+
+		var chart5 = dc.scatterPlot('#chart5');
+
+		let extDimension = facts.dimension(function(d){
+	            return [d.ct+d.c,d.dt+d.d,d.q,d.ano,d.tipo];
+	        });
+
+		chart5
+		    .width(960)
+		    .height(200)
+		    .x(d3.scaleLinear().domain(d3.extent(data, function(d) { return +d.ct+d.c; })))
+		    .brushOn(false)
+		    .symbolSize(8)
+		    .clipPadding(10)
+		    .xAxisLabel('CT+C')
+            .yAxisLabel('DT+D')
+		    .dimension(extDimension)
+		    .title(function(d){
+		    	return `Question ${d.key[2]}, year ${d.key[3]}, ${d.key[4]}`;
+		    })
+			.colorAccessor(function(d){ return d.key[3]; })
+			.symbol(function(d){
+				if( d.key[4]==='discente'){
+					return d3.symbolCircle;
+				}
+				else{
+					return d3.symbolDiamond;
+				}
+			})
+		    .group(extDimension.group());
+			
+		var chart7 = dc.scatterPlot('#chart7');
+
+		let dumDimension = facts.dimension(function(d){
+	            return [d.ct+d.c,d.q,d.ano,d.tipo];
+	        });
+
+		chart7
+		    .width(960)
+		    .height(200)
+		    .x(d3.scaleLinear().domain(d3.extent(data, function(d) { return +d.ct+d.c; })))
+		    .y(d3.scaleLinear().domain(d3.extent(data, function(d) { return +d.q; })))
+		    .brushOn(false)
+		    .symbolSize(8)
+		    .clipPadding(10)
+		    .xAxisLabel('CT+C')
+            .yAxisLabel('Question')
+		    .dimension(dumDimension)
+		    .title(function(d){
+		    	return `Question ${d.key[1]}, year ${d.key[2]}, ${d.key[3]}`;
+		    })
+			.colorAccessor(function(d){ return d.key[2]; })
+			.symbol(function(d){
+				if( d.key[3]==='discente'){
+					return d3.symbolCircle;
+				}
+				else{
+					return d3.symbolDiamond;
+				}
+			})
+		    .group(dumDimension.group());
+
+		
+
+		var chart6 = dc.pieChart('#chart6');
+
+		chart6
+	    .width(960)
+	    .height(400)
+	    .slicesCap(4)
+	    .innerRadius(100)
+	    .dimension(qDimension)
+	    .group(qDimension.group().reduceSum(function(d){
+	    	return d.nsa/anos.size;
+	    }))
+	    .legend(dc.legend())
+	    // workaround for #703: not enough data is accessible through .label() to display percentages
+	    .on('pretransition', function(chart) {
+	        chart.selectAll('text.pie-slice').text(function(d) {
+	        	if(d.data.key !== 'Others'){
+	        		return 'Questão '+ d.data.key + ': ' + dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
+	        	}
+	            return d.data.key + ': ' + dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
+	        })
+	    });
+
+	  // Render the Charts
+	  
+	  dc.renderAll();
+	});
+	</script>
+	 <!-- Bootstrap javascript files -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+		
+</body>
+</html>
