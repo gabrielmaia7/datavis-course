@@ -41,6 +41,4 @@ h2 span {
     margin: 0 5px 5px 5px;
 }
 
-li:not(.dc-cbox-item) {
-    visibility: hidden;
-}
+
