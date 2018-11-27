@@ -15,6 +15,7 @@
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="js/crossfilter.min.js"></script>
     <script src="js/dc.min.js"></script>
+    <script src="https://vega.github.io/vega/vega.min.js"></script>
 </head>
 <body>
   <main role="main" class="container">
@@ -78,6 +79,7 @@
 			d.d = +d.d;
 			d.dt = +d.dt;
 			d.nsa = +d.nsa;
+			d.dif = (d.c+d.ct)-(d.d+d.dt);
 			if(!anos.includes(d.ano))
 				anos.push(d.ano);
 
@@ -300,43 +302,17 @@
 		    .group(extDimension.group())
 		    .chartGroup('g1');
 			
-		var chart7 = dc.scatterPlot('#chart7');
 
 		let dumDimension = facts.dimension(function(d){
 	            return [d.ct+d.c,d.q,d.ano,d.tipo];
 	        });
 
-		chart7
-		    .width(960)
-		    .height(200)
-		    .x(d3.scaleLinear().domain(d3.extent(data, function(d) { return +d.ct+d.c; })))
-		    .y(d3.scaleLinear().domain(d3.extent(data, function(d) { return +d.q; })))
-		    .brushOn(false)
-		    .symbolSize(8)
-		    .clipPadding(10)
-		    .xAxisLabel('CT+C')
-            .yAxisLabel('Question')
-		    .dimension(dumDimension)
-		    .title(function(d){
-		    	return `Question ${d.key[1]}, year ${d.key[2]}, ${d.key[3]}`;
-		    })
-			.colorAccessor(function(d){ return d.key[2]; })
-			.symbol(function(d){
-				if( d.key[3]==='discente'){
-					return d3.symbolCircle;
-				}
-				else{
-					return d3.symbolDiamond;
-				}
-			})
-		    .group(dumDimension.group());
 
 
 	  // Render the Charts
 	  dc.renderAll('g1');
 	  dc.renderAll('g2');
 	  qTable.render();
-	  dc.renderAll();
 
 	  d3.selectAll('option:not(.dc-select-option)').attr('disabled','disabled').attr('hidden','hidden');
 
@@ -398,7 +374,23 @@
 	  //qTipoAnoDimension.filterFunction(function(d){
 	  //	return (d[0]==Math.abs(d3.select('#smenu3').select('select').node().selectedIndex));
 	  //});
+
+
+		var view;
+		vega.loader().load('chart7.json').then(function(specjson){
+			spec = JSON.parse(specjson);
+			view = new vega.View(vega.parse(spec))
+				.renderer('svg')
+				.initialize('#chart7')
+				.hover()
+				.signal('amount',anos.length)
+				.insert('questions',data)
+				.run();
+		});
+
+
 	 });
+
 
 	</script>
 	 <!-- Bootstrap javascript files -->
